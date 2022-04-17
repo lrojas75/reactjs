@@ -4,7 +4,7 @@ npm install -g live -server
 live-server <folder_with_html_file> (This will automatically open a tab in browser with you html file).
 Ex: live-server public
 
-## Setup ReactJS
+## Setup ReactJS project manually
 npm init to create package.json file to handle project dependencies.
 ### Folder structure:
 public (folder that will be loaded to be serve)
@@ -31,3 +31,154 @@ Create your app.js file inside src folder which will be your starting point for 
 
 --> To manually compile a file from JSX to ES5 using babel: babel src/app.js --out-file=public/scripts/app.js --presets=env,react
 
+### Create first React component:
+A React component is an ES6 class that extends from `React.Component`. We are extending from `React` and accessing the class `Component` to access all
+of the features provided by a React Component. This Component class requires us to implement the method `render()` which has no arguments and returns jsx.
+``` JavaScript
+class Header extends React.Component {
+    render() {
+        return <p>This is from Header</p>;
+    }
+}
+```
+React enforces that the created components have the first letter in uppercase because that's how React differentiates this component from the normal
+html components so it can determine whether is rendering a React Component or an html element. This can be seen when the code for this component is
+transpiled to ES6 using Babel and in that code we can see the calls to `React.createElement(Header, null)` instead of `React.createElement('div', null)`
+which is how it would normally render an html element.
+In this call `React.createElement(Header, null)`, we see how React understands it needs to render the class Header and not just a normal html element.
+
+
+To render this custom html element we created to the screen, we use the `render(jsx, destination_div)` method provided by `ReactDOM` Object. So the 
+final code to show the Header component in the web browser is:
+``` JavaScript
+class Header extends React.Component {
+    render() {
+        return <p>This is from Header</p>;
+    }
+}
+
+const jsx = (
+    <div>
+        <h1>Title</h1>
+        <Header />
+    </div>
+);
+
+ReactDOM.render(jsx, document.getElementById('app'));
+```
+**React Components are reusable so we can add as many `<Header />` tags as we want in there.**
+
+### React component props
+Component props are key-value objects that allow us to comunicate/pass data between components. The props we send to a component can have
+any name we decide to give them and they are added inline inside the Component's tag where is being called in the code.
+``` JavaScript
+    <Header title="Test value"/>
+```
+To access this props object inside the component, React allows us to reference it through the `this` keyword which is a current reference
+to the component. So, `this.props` will allow us to access the object that has all the props sent to the component.
+``` JavaScript
+    class Header extends React.Component {
+        render() {
+            this.props;
+            return (
+                <div>
+                    <h1>{this.props.title}</h1>
+                    <h2>Put your life in the hands of a computer</h2>
+                </div>
+            );
+        }
+    }
+```
+
+### JS -this- binding
+The keyword `this` references the parent context of where it is located. So for this example:
+``` JavaScript
+const obj = {
+    name: 'Vikram',
+    getName() {
+        return this.name;
+    }
+}
+
+console.log(obj.getName())
+```
+The keyword `this` works correctly because it will point to the parent context which in this case is `obj`. But there are cases where the
+context is changed and the keyword example above won't work. An example of this is storing the `getName` method as a reference in a function:
+```JavaScript
+const obj = {
+    name: 'Vikram',
+    getName() {
+        return this.name;
+    }
+}
+
+const getName = obj.getName;
+
+console.log(getName());
+```
+For this case, the `this` keyword is undefined because the new parent context is the function `getName` we defined and context is not transfered but
+instead is lost in the process.
+To not lose this context, we can use the method `bind` which takes as the first argument the object to be binded to `this` of the function.
+So to fix the issue in the example above, we can do:
+```JavaScript
+const getName = obj.getName.bind(obj);
+// OR
+const getName = obj.getName.bind({ name: 'Andrew' });
+```
+
+**In React, when we define a constructor for the class, we do the binding for the function inside the constructor to avoid do it in in every render call**
+```JavaScript
+class Options extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleRemoveAll = this.handleRemoveAll.bind(this);
+    }
+
+    handleRemoveAll() {
+        console.log(this.props.options);
+    }
+
+    render() {
+        return (
+            <div>
+                <button onClick={this.handleRemoveAll}>Remove All</button>
+                {this.props.options.map(option => <Option key={option} option={option} />)}
+            </div>
+        );
+    }
+}
+```
+
+### React Component State
+It's a key-value pair object that allows our components to manage data and re render the dom based on the changes automatically.
+This object can be set initially with a default state and be updated by us using functions. React then will be in charge of
+updating the dom with the changes.
+To setup the state object, we just create it in the class constructor:
+```JavaScript
+class Counter extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            count: 0
+        }
+    }
+```
+We can easily access inside the Component by calling it like this `this.state.count`.
+To update the state, we don't access it directly and modify it, instead we use the provided function by React `setState` which
+takes as an argument a function and returns the modified state object.
+```JavaScript
+this.setState(() => {
+    return {
+        count: 1,
+    }
+})
+```
+If we need to update an existing value in the state instead of replacing it, we can take as an argument `prevState` which references
+the current state before being updated and make the update:
+```JavaScript
+this.setState((prevState) => {
+    return {
+        count: prevState.count + 1,
+    }
+})
+```
