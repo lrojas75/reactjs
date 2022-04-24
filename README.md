@@ -33,6 +33,7 @@ Create your app.js file inside src folder which will be your starting point for 
 
 ### Create first React component:
 ***As of React v18, a warning shows up to use createRoot method instead of render()***
+
 A React component is an ES6 class that extends from `React.Component`. We are extending from `React` and accessing the class `Component` to access all
 of the features provided by a React Component. This Component class requires us to implement the method `render()` which has no arguments and returns jsx.
 ``` JavaScript
@@ -220,14 +221,16 @@ Header.defaultProps = {
 ```
 ### React life cycle functions
 ***As of React v18, a warning shows up to use createRoot method instead of render()***
+
 These are built in methods that fire at various times in a given components' life. A component has three phases which are:
 
 ***Mounting:*** The methods of this phase are called when the component is created and inserted into the DOM. The methods are:
-constructor(), *getDerivedStateFromProps()*, render() and componentDidMount(). They are called in that order when rendering the component;
+constructor(), *getDerivedStateFromProps()*, render() and componentDidMount(). They are called in that order when rendering the component.
 
 ***Updating:*** The methods of this phase are called *only* when the component updates which means when the
 props or the state of the component change. The methods are: *getDerivedStateFromProps()*, shouldComponentUpdate(), render()
 *getSnapshotBeforeUpdate()* and componentDidUpdate();
+
 **componentDidUpdate(prevProps, prevState):** . This function takes as arguments **prevProps** which represents the props
 object before the change and **prevState** which represents the state before the change.
 
@@ -304,7 +307,7 @@ the ```scripts``` to now grab the ```bundle.js``` file created by webpack.
 They allow us to tell webpack to process specific files through a process so we can work with the result. So in the
 following example, we will tell webpack to transform ```.js``` files using babel so we can render their code correctly
 into the browser:
-``` JSON
+``` JavaScript
 // loader
     module: {
         rules: [{
@@ -348,6 +351,7 @@ setting them before using the command line with the argument ```--presets=env,re
 the ```options``` attribute inside ```rules```.
 
 *babel-cli allows us to run babel through the command line and the babel-core package allows us to run babel through tools like webpack.*
+
 *babel-loader is a webpack plugin that allow us to teach webpack how to run babel when webpack sees certain files.*
 
 ### New folder structure after adding webpack to project
@@ -369,7 +373,7 @@ on build.
 Switch to DevServer to use a more specialized server to React than using ```live-server``` which is a more general one.
 ```npm i webpack-dev-server```
 Add the attribute ```devServer``` to the ```module.exports``` object in the webpack.config.js file:
-```JSON
+```JavaScript
 devServer: {
     static: path.join(__dirname, 'public')
 }
