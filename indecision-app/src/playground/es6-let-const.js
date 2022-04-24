@@ -16,11 +16,11 @@ console.log('nameConst', nameConst);
 
 // SCOPE
 function getPetName() {
-    var petName = 'Hal';
-    // const petName = 'Hal';
-    // let petName = 'Hal';
+  var petName = 'Hal';
+  // const petName = 'Hal';
+  // let petName = 'Hal';
 
-    return petName;
+  return petName;
 }
 
 getPetName();
@@ -29,10 +29,10 @@ getPetName();
 // Block scoping
 var fullName = 'Luis Rojas';
 if (fullName) {
-    var firstName = fullName.split(' ')[0];
-    // const firstName = fullName.split(' ')[0];
-    // let firstName = fullName.split(' ')[0];
-    console.log(firstName);
+  var firstName = fullName.split(' ')[0];
+  // const firstName = fullName.split(' ')[0];
+  // let firstName = fullName.split(' ')[0];
+  console.log(firstName);
 }
 // I can access the var one because an if is not a function but the const and let i can't because they are blocked-scoped.
 

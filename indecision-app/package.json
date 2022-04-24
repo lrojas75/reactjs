@@ -6,6 +6,7 @@
   "scripts": {
     "serve": "live-server public/",
     "build": "webpack --mode production",
+    "build-babel": "npx babel src/app.js --out-file=public/scripts/app.js --presets=@babel/preset-env,@babel/preset-react --watch",
     "dev-server": "webpack serve --mode=development"
   },
   "author": "",
@@ -17,9 +18,15 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.2.5",
+    "css-loader": "^6.7.1",
     "live-server": "^1.2.1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "node-sass": "^7.0.1",
+    "normalize.css": "^8.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-modal": "^3.14.4",
+    "sass-loader": "^12.6.0",
+    "style-loader": "^3.3.1",
     "validator": "^13.7.0",
     "webpack": "^5.72.0",
     "webpack-dev-server": "^4.8.1"

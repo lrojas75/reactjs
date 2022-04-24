@@ -1,5 +1,5 @@
-function square (x) {
-    return x * x;
+function square(x) {
+  return x * x;
 }
 
 console.log(square(3));
