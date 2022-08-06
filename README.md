@@ -757,3 +757,717 @@ export default (a, b) => a - b;
 It has to be an expression after the `export default` and not a statement because it will generate a syntax error:
 `export default const substract = (a, b) => a - b;`
 That will generate an error on runtime.
+
+## React-Router
+
+### Initial setup
+
+`npm install react-router-dom` for webapps.
+`npm install react-router-native` for native apps.
+
+1. import `import { BrowserRouter, Routes, Route } from 'react-router-dom';` in app.js (for initial testing)
+2. Create const with jsx that will contain the routes for your app:
+
+### First use
+
+```JavaScript
+const ExpenseDashboardPage = () => ( // Temp functional component created to example.
+    <div>
+        This is from my dashboard component
+    </div>
+);
+const routes = ( // As of v6, Route element(s) must be wrapped in Routes element and the component is set in the elements prop.
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<ExpenseDashboardPage />} />
+      {/* Any additional routes go here..or above */}
+    </Routes>
+  </BrowserRouter>
+);
+```
+
+As of v6, the keyword `exact` is not needed to avoid matching routes like `/` and `/create`.
+
+Each `Route` element will represent a route/view in the app. It takes in a `path` and `component` as props.
+
+With out current implementation of devServer, the app won't be able to render the new routes. So we need
+to tell the server that we will handle routing via our client side code adding the following configuration:
+We add the `historyApiFallback: true` inside `devServer` object in webpack.
+
+```JavaScript
+devServer: {
+    static: path.join(__dirname, 'public'),
+    historyApiFallback: true,
+  },
+```
+
+So now when we load our webapp, the server will return out html which will load our bundle > which will then load our
+`app.js` and then the routes are loaded to be used.
+
+### 404 page
+
+To create a default route, we can do it by adding `*` to the path of a route. As of `v6`, `Routes` component (which replaced
+`Switch`) chooses the route based on the best match instead of being reviewed in order. So using `*` will match all routes but
+based on new match behaviour, it will act as a default case for when no exact match was found:
+
+```JavaScript
+const routes = (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<ExpenseDashboardPage />} />
+      <Route path="/create" element={<AddExpensePage />} />
+      <Route path="/edit" element={<EditExpensePage />} />
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  </BrowserRouter>
+);
+```
+
+The route with `*` can be first or last, it doesn't matter. The bahaviour will remain the same.
+
+### Render a component in all pages
+
+Add the component to be render before the `<Routes>` component:
+
+```JavaScript
+const routes = (
+  <BrowserRouter>
+    <Header />
+    <Routes>
+      <Route path="/" element={<ExpenseDashboardPage />} />
+      <Route path="/create" element={<AddExpensePage />} />
+      <Route path="/edit" element={<EditExpensePage />} />
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  </BrowserRouter>
+);
+```
+
+### Folder structure update to add Routes
+
+```
+project
+└─── public
+│   │___ images
+│   │   bundle.js
+│   │   index.html.js
+│
+└─── src
+│   app.js
+└─────── components
+└─────── playground
+└─────── routers
+│           AppRouter.js
+└─────── styles
+```
+
+```JavaScript
+// app.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import AppRouter from './routers/AppRouter';
+import 'normalize.css/normalize.css';
+import './styles/styles.scss';
+
+ReactDOM.render(<AppRouter />, document.getElementById('app'));
+```
+
+```JavaScript
+// AppRouter.js
+import React from 'react';
+import { BrowserRouter, NavLink, Routes, Route } from 'react-router-dom';
+import AddExpensePage from '../components/AddExpensePage';
+import EditExpensePage from '../components/EditExpensePage';
+import ExpenseDashboardPage from '../components/ExpenseDashboardPage';
+import Header from '../components/Header';
+import HelpPage from '../components/HelpPage';
+import NotFoundPage from '../components/NotFoundPage';
+
+const AppRouter = () => (
+  <BrowserRouter>
+    <Header />
+    <Routes>
+      <Route path="/" element={<ExpenseDashboardPage />} />
+      <Route path="/create" element={<AddExpensePage />} />
+      <Route path="/edit" element={<EditExpensePage />} />
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  </BrowserRouter>
+);
+
+export default AppRouter;
+```
+
+### Handle query params
+
+To use dynamic query params in the url of the route, we add them like this:
+`<Route path="/edit/:id" element={<EditExpensePage />} />`
+To capture the params in component and use them, we grab them use the hook `useParams` like this:
+
+```JavaScript
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+const EditExpensePage = () => {
+  const params = useParams();
+  // It could also be extracted like const { id } = useParams();
+  return <div>Editing the expense with id of {params.id}</div>;
+};
+
+export default EditExpensePage;
+```
+
+### Redux
+
+The Redux store is a state container represented by an object. It allows us to decouple our app by allowing us to have
+a global state in our app that our components can use and also helps us to have really reuseable components that don't
+need to depend on props from a parent but instead can grab the data needed from the Redux store.
+
+`npm install redux`
+
+To create a Redux store, we import the `createStore` function from redux package and do the following:
+
+```JavaScript
+import { legacy_createStore as createStore } from 'redux';
+
+const store = createStore((state = { count: 0 }) => {
+    return state;
+});
+```
+
+This creates a store with a default state object that has the property count at 0 and returns the state.
+
+**Actions**
+To update the Redux store values, we need to use actions. Actions is an object that gets sent to the store.
+To increment the count value with an action, we would create an object like this:
+
+```JavaScript
+{
+    type: 'INCREMENT'
+}
+// The naming convention is all uppercase letters and additional words are concatenated using a bottom line: TWO_WORDS.
+```
+
+To send the action to the store, we would use the `dispatch()` function provided by the store:
+
+```JavaScript
+store.dispatch({
+    type: 'INCREMENT'
+});
+```
+
+Now, to actually update the the count property we need to tell the store what to do when the action is received:
+
+```JavaScript
+import { legacy_createStore as createStore } from 'redux';
+// Notice we now added the 'action' parameter to the createStore function.
+const store = createStore((state = { count: 0 }, action) => {
+  if (action.type === 'INCREMENT') {
+    return {
+      count: state.count + 1, // We do not replace the state but instead update the received state.
+    };
+  } else {
+    return state;
+  }
+});
+```
+
+To make a cleaner and better scalable code, we use `switch-case` instead of `if`:
+
+```JavaScript
+const store = createStore((state = { count: 0 }, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1, // We do not replace the state but instead update the received state.
+      };
+    default:
+      return state;
+  }
+});
+```
+
+Example:
+
+```JavaScript
+const store = createStore((state = { count: 0 }, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1, // We do not replace the state but instead update the received state.
+      };
+    case 'DECREMENT':
+      return {
+        count: state.count - 1,
+      };
+    case 'RESET':
+      return {
+        count: 0,
+      };
+    default:
+      return state;
+  }
+});
+
+store.dispatch({
+  type: 'INCREMENT',
+});
+store.dispatch({
+  type: 'INCREMENT',
+});
+store.dispatch({
+  type: 'RESET',
+});
+store.dispatch({
+  type: 'DECREMENT',
+});
+
+console.log(store.getState()); // This prints: -1
+```
+
+**Using subscribe() function:**
+
+```JavaScript
+store.subscribe(() => {
+  console.log(store.getState());
+});
+
+/* Adding this to the previous example, it would print on console:
+{count:0}
+{count:1}
+{count:2}
+{count:0}
+{count:-1}
+*/
+```
+
+To unsubcribe to the changes, the subscribe function returns a function to unsubscribe:
+
+```JavaScript
+const unsubscribe = store.subscribe(() => {
+  console.log(store.getState());
+});
+unsubscribe();
+```
+
+**Send data in actions**
+
+```JavaScript
+// The type property is required, always has to be sent and the name is always expected to be "type".
+// Additional data can be sent inside this object along with the type property.
+store.dispatch({
+  type: 'INCREMENT',
+  incrementBy: 5,
+});
+
+//The store case would be updated to:
+case 'INCREMENT':
+    const incrementBy =
+    typeof action.incrementBy === 'number' ? action.incrementBy : 1;
+    return {
+        count: state.count + incrementBy,
+    };
+```
+
+**Actions Generators**
+
+```JavaScript
+// Actions Generators
+const incrementCount = ({ incrementBy = 1 } = {}) => ({
+  type: 'INCREMENT',
+  incrementBy,
+});
+
+const decrementCount = ({ decrementBy = 1 } = {}) => ({
+  type: 'DECREMENT',
+  decrementBy,
+});
+
+const setCount = ({ count }) => ({
+  type: 'SET',
+  count,
+});
+
+const resetCount = () => ({
+  type: 'RESET',
+});
+
+const store = createStore((state = { count: 0 }, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + action.incrementBy, // We do not replace the state but instead update the received state.
+      };
+    case 'DECREMENT':
+      return {
+        count: state.count - action.decrementBy,
+      };
+    case 'SET':
+      return {
+        count: action.count,
+      };
+    case 'RESET':
+      return {
+        count: 0,
+      };
+    default:
+      return state;
+  }
+});
+
+const unsubscribe = store.subscribe(() => {
+  console.log(store.getState());
+});
+
+store.dispatch(incrementCount({ incrementBy: 5 }));
+store.dispatch(incrementCount());
+
+store.dispatch(resetCount());
+
+store.dispatch(decrementCount());
+store.dispatch(decrementCount({ decrementBy: 10 }));
+
+store.dispatch(setCount({ count: 101 }));
+```
+
+### Redux functions
+
+`createStore(function(state: {}, action))`: Creates a store and uses the function to update and return an updated state.
+`getState()`: Returns the current state of the redux store. Ex: `store.getState() -> returns an object {count: 0}`.
+`store.dispatch()`: Allows us to send an action to the store.
+`store.subscribe(): returns a function to call to unsubscribe`: Allows us to watch changes to the Redux store. It is
+useful to take action every time the state changes.
+
+### Reducers
+
+They are functions that take the current state and an action, and return a new state as result.
+
+```JavaScript
+// Reducers
+// 1. Reducers are pure functions
+// 2. Never change state or action.
+const countReducer = (state = { count: 0 }, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + action.incrementBy, // We do not replace the state but instead update the received state.
+      };
+    case 'DECREMENT':
+      return {
+        count: state.count - action.decrementBy,
+      };
+    case 'SET':
+      return {
+        count: action.count,
+      };
+    case 'RESET':
+      return {
+        count: 0,
+      };
+    default:
+      return state;
+  }
+};
+
+const store = createStore(countReducer);
+```
+
+### Provider
+
+It allows us to share the store with all the components in out app. To use it, we need to install the `react-redux` package:
+`npm i react-redux`
+and then import it:
+`import { Provider } from 'react-redux';`
+
+The Provider component wraps the Router or the main component and takes in the store as a prop.
+
+```JavaScript
+const store = configureStore();
+
+const jsx = (
+  <Provider store={store}>
+    <AppRouter />
+  </Provider>
+);
+
+ReactDOM.render(jsx, document.getElementById('app'));
+```
+
+To use the store in a component, we need to import `connect` from the `react-redux` package in the component that will use it:
+`import { connect } from 'react-redux`.
+The connect function will allow the component to "connect" to the store and access the data.
+
+The connect function takes in a function to specify the data that needs to be grabbed from the store and also takes in the
+component that will be wrapped and connected to the store:
+
+```JavaScript
+import React from 'react';
+import { connect } from 'react-redux';
+
+const ExpenseList = props => (
+  <div>
+    <h1>Expense List</h1>
+    {props.expenses.length}
+  </div>
+);
+
+const mapStateToProps = state => {
+  return {
+    expenses: state.expenses,
+  };
+};
+
+const ConnectedExpenseList = connect(mapStateToProps)(ExpenseList);
+
+export default ConnectedExpenseList;
+// In a real production code, the export statement is more likely to look like this:
+export default connect(mapStateToProps)(ExpenseList);
+```
+
+I can use connect without mapping the state to the props in case I don't need anything from the Redux store in the component:
+
+```JavaScript
+const ExpenseListItem = ({ dispatch, id, description, amount, createdAt }) => (
+  <div>
+    <h3>{description}</h3>
+    <p>
+      {amount} - {createdAt}
+    </p>
+    <button onClick={() => dispatch(removeExpense({ id }))}>Remove</button>
+  </div>
+);
+
+export default connect()(ExpenseListItem);
+```
+
+Notice I can make dispatch available by adding it in the destructured object and by calling connect with not args.
+
+### Additional Redux Store configurations and Redux Dev tools Chrome Extension
+
+To create the store we use the `createStore` function from the package `redux`:
+
+```JavaScript
+import { legacy_createStore as createStore } from 'redux';
+
+const store = configureStore();
+```
+
+To add the reducers we will be using in our app, the store allows us to add the reducers through the `configureStore` function:
+
+```JavaScript
+import { legacy_createStore as createStore, combineReducers } from 'redux';
+
+const store = configureStore(reducerFunction);
+
+// or for more than one reducer function
+const store = createStore(
+    combineReducers({
+      expenses: expensesReducer,
+      filters: filtersReducer,
+    }),
+  );
+```
+
+To connect the Redux store with the Redux chrome extension for debugging purposes, we need to add the following line that is
+specified in the chrome extension's docs: https://github.com/reduxjs/redux-devtools/tree/main/extension#installation
+`window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()` as an argument to `createStore`:
+
+```JavaScript
+import { legacy_createStore as createStore, combineReducers } from 'redux';
+
+const store = configureStore(reducerFunction);
+
+// or for more than one reducer function
+const store = createStore(
+  combineReducers({
+    expenses: expensesReducer,
+    filters: filtersReducer,
+  }),
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
+```
+
+As of React 18, createStore function has been deprecated and now we have to use `configureStore()`. This functions is similar
+to `createStore` where it still takes as the first argument the reducers to be used in the app.
+There are two ways to set the Reducers:
+
+```JavaScript
+import { legacy_createStore as createStore, combineReducers } from 'redux';
+
+// Send reducers as a key-value object where the value is the reducer function. This will use combineReducers under the table.
+const store = configureStore({
+  expenses: expensesReducer,
+  filters: filtersReducer,
+});
+// Use combineReducers function
+const store = createStore(
+  combineReducers({
+    expenses: expensesReducer,
+    filters: filtersReducer,
+  }),
+);
+```
+
+### Destructuring
+
+```Javascript
+//
+// Object Destructuring
+//
+
+const person = {
+  name: 'Andrew',
+  age: 26,
+  location: {
+    city: 'Philadelphia',
+    temp: 92,
+  },
+};
+
+// Combines renaming with default value.
+const { name: firstName = 'Anonymous', age } = person;
+console.log(`${firstName} is ${age}`);
+
+const { city, temp: temperature } = person.location;
+if (city && temperature) {
+  console.log(`It's ${temperature} in ${city}.`);
+}
+
+const book = {
+  title: 'Ego is the Enemy',
+  author: 'Ryan Holiday',
+  publisher: {
+    name: 'Penguin',
+  },
+};
+
+const { name: publisherName = 'Self-Published' } = book.publisher;
+console.log(publisherName); // Penguin - Self-Published
+
+//
+// Array Destructuring
+//
+
+const address = [
+  '1299 S Juniper Street',
+  'Philadelphia',
+  'Pensylvania',
+  '19147',
+];
+// Ignores the first item and the last one.
+const [, city, state = 'New York'] = address;
+console.log(`You are in ${city} ${state}.`);
+
+const item = ['Coffee (hot)', '$2.00', '$2.50', '$2.75'];
+
+const [itemName, , mediumPrice] = item;
+
+console.log(`A medium ${itemName} costs ${mediumPrice}`);
+```
+
+### Higher Order Component (HOC)
+
+A component (HOC) that renders another component.
+Purpose:
+To reuse code
+Render hijacking:
+Prop manipulation:
+Add Abstract state:
+
+Example:
+
+```JavaScript
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const Info = props => (
+  <div>
+    <h1>Info</h1>
+    <p>The info is: {props.info}</p>
+  </div>
+);
+
+const withAdminWarning = WrappedComponent => {
+  return props => (
+    <div>
+      <p>This is private info. Please don't share!</p>
+      <WrappedComponent {...props} />
+    </div>
+  );
+};
+
+const AdminInfo = withAdminWarning(Info); // withAdminWarning wraps Info and returns the new component
+
+ReactDOM.render(
+  <AdminInfo info="These are the details" />,
+  document.getElementById('app')
+);
+
+// ** Props are passed to the HOC and then passed again by destructuring (in this example) to the component that needs them.
+```
+
+## React 18 Hooks
+
+### useSelector
+
+The useSelector hook allows us to access the Redux store in a functional component without the need of using `connect()()`:
+
+```JavaScript
+const expenses = useSelector(state => state.expenses);
+```
+
+### useDispatch
+
+The useDispatch hook gives us access to the dispatch function in a functional component without the need of using `connect()()`:
+
+### useNavigate
+
+To redirect a user to another page we don't use `history.push()` anymore. Instead, we use the hook `useNavigate` from
+`react-router-dom` package:
+
+```JavaScript
+import { useNavigate } from 'react-router-dom';
+
+const navigate = useNavigate();
+navigate('/');
+```
+
+### Example:
+
+```JavaScript
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import ExpenseForm from './ExpenseForm';
+import { editExpense } from '../actions/expenses';
+
+const EditExpensePage = () => {
+  // Get Expense array from the store
+  const expenses = useSelector(state => state.expenses);
+  // Get id from the params
+  const { id } = useParams();
+  // Find the expense that matches the id
+  const expense = expenses.find(expense => expense.id === id);
+  // Grab dispatch function
+  const dispatch = useDispatch();
+  // Set navigate function to redirect after submit
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <ExpenseForm
+        expense={expense}
+        onSubmit={expense => {
+          dispatch(editExpense(id, expense));
+          navigate('/');
+        }}
+      />
+    </div>
+  );
+};
+
+export default EditExpensePage;
+```
