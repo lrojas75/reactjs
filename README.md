@@ -1576,10 +1576,11 @@ test('Should render Header correctly: ', () => {
    - Run `eval "$(ssh-agent -s)"` to make sure the ssh agent is running. If it's not running, it will start it up.
    - Run `ssh-add ~/.ssh/id_rsa` to add the new key.
    - Check `https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account`
-   to see steps to copy pub file to clipboard and then into github in Settings > SSH and GPG Keys. Steps to copy change based on OS.
+     to see steps to copy pub file to clipboard and then into github in Settings > SSH and GPG Keys. Steps to copy change based on OS.
    - `ssh -T git@github.com` validates if the secure connection to github and ssh key was correctly setup.
 4. Now, copy the ssh url for the new repo created in github and run `git remote add origin ssh_repo_url` to let git now where our code
    is going to live in.
+5. Configure webpack for production
 
 ### Git commands
 
@@ -1593,3 +1594,105 @@ test('Should render Header correctly: ', () => {
 - `git remote`
 - `git remote -v`
 - `git push -u origin branch`: For the first time push. After that, the `-u` is not needed anymore.
+
+### Setup webpack for production.
+
+1. Change `package.json` scripts to one of the following to build for a specified enviroment:
+
+```JavaScript
+"build:dev": "webpack --mode development",
+"build:prod": "webpack --mode production",
+```
+
+2. Update module export in webpack file to reduce the bundle size.
+   Added lines `const isProduction = argv.mode === 'production';` and `devtool: isProduction ? 'source-map' : 'eval-cheap-module-source-map',`
+
+```JavaScript
+module.exports = (_env, argv) => {
+  const isProduction = argv.mode === 'production';
+
+  return {
+    entry: './src/app.js',
+    output: {
+      path: path.join(__dirname, 'public'),
+      filename: 'bundle.js',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/, //files that end in .js
+          exclude: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-react', '@babel/preset-env'],
+            },
+          },
+        },
+        {
+          test: /\.s?css$/,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        },
+      ],
+    },
+    devtool: isProduction ? 'source-map' : 'eval-cheap-module-source-map',
+    devServer: {
+      static: path.join(__dirname, 'public'),
+      historyApiFallback: true,
+    },
+  };
+};
+```
+
+3. Update webpack to now remove the css styles from the bundle and reduce even more the size of the file.
+   Install: `npm i mini-css-extract-plugin`
+   Then:
+
+- Add to webpack file: `const MiniCssExtractPlugin = require('mini-css-extract-plugin')` before `module.exports`.
+- Update the css rule to:
+
+```JavaScript
+{
+  test: /\.s?css$/,
+  use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+},
+```
+
+This allows us to extract the css files into their own file.
+
+- Add the new plugin to the webpack config using the `plugins` property (It goes at the same height of the property `module`):
+
+```JavaScript
+plugins: [
+  new MiniCssExtractPlugin({
+    filename: 'styles.css',
+  }),
+],
+```
+
+- Add link to html base file to load the separate styles file: `<link rel="stylesheet" type="text/css" href="/styles.css" />`.
+- Add sourcemaps for the style files:
+
+```JavaScript
+{
+  test: /\.s?css$/,
+  use: [
+    MiniCssExtractPlugin.loader,
+    {
+      loader: 'css-loader',
+      options: {
+        sourceMap: true,
+      },
+    },
+    {
+      loader: 'sass-loader',
+      options: {
+        sourceMap: true,
+      },
+    },
+  ],
+},
+
+// Then for the plugin
+devtool: isProduction ? 'source-map' : 'inline-cheap-module-source-map',
+```
