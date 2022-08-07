@@ -1696,3 +1696,40 @@ plugins: [
 // Then for the plugin
 devtool: isProduction ? 'source-map' : 'inline-cheap-module-source-map',
 ```
+
+### Setup Express Server
+
+Express server to serve up our public folder in a more serious web server :).
+
+- Added `serve` folder in the root folder of the app and added inside a file named `server.js`.
+- Install express: `npm install express`.
+
+**Add basic code to get our public folder running in the express server:**
+
+```JavaScript
+const path = require('path');
+const express = require('express');
+const app = express();
+const publicPath = path.join(__dirname, '..', 'public');
+
+// Tell express to serve our public directory to display our assets.
+app.use(express.static(publicPath));
+
+app.listen(3000, () => {
+  console.log('Server is up!');
+});
+```
+
+Now, currently if we navigate to our existing views using the menu it will work but if we refresh it, the server will error out
+saying that the page doesn't exist. To fix this routing issue, we have to serve up `index.html` for all routes that don't match
+in the public folder when you try navigating to it. To do this, we add the following line to our express file right before the call
+to the `listen()` function:
+
+```JavaScript
+// If what the person requested doesn't exist, give them the index file (Allows our app to handle routing).
+app.get('*', (request, response) => {
+  response.sendFile(path.join(publicPath, 'index.html'));
+});
+```
+
+## Deplying to Heroku
