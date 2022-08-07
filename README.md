@@ -1732,4 +1732,23 @@ app.get('*', (request, response) => {
 });
 ```
 
-## Deplying to Heroku
+## Deploying to Heroku
+
+Heroku is app deployment platform similar to DigitalOcean.
+
+1. Create account in Heroku
+2. Install heroku CLI: Navigate to https://devcenter.heroku.com/articles/heroku-cli to see instructions for your OS. Test it with `heroku --version`.
+3. Login using `heroku login`.
+4. Create an app: `heroku create app-name`
+5. Add `start` script that heroku will call when we upload our app: `"start": "node server/server.js"`
+6. Update `server.js` file to use the dynamic port that Heroku will give us or default to 3000 if we are running locally:
+
+```JavaScript
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+  console.log('Server is up!');
+});
+```
+
+7. Teach Heroku how to run webpack by adding the following script to `package.json`: `“heroku-postbuild”: “npm run build:prod”`.
