@@ -1572,12 +1572,12 @@ test('Should render Header correctly: ', () => {
 2. Setup Github repo: Create github account and then create a new repository.
 3. Setup ssh keys:
    To check for existing ssh for a project `ls -a ~/.ssh`. If none exist, then:
-   -> Run `ssh-keygen -t rsa -b 4096 -C "email address here"` to create an ssh key if none exists.
-   -> Run `eval "$(ssh-agent -s)"` to make sure the ssh agent is running. If it's not running, it will start it up.
-   -> Run `ssh-add ~/.ssh/id_rsa` to add the new key.
-   -> Check `https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account`
+   - Run `ssh-keygen -t rsa -b 4096 -C "email address here"` to create an ssh key if none exists.
+   - Run `eval "$(ssh-agent -s)"` to make sure the ssh agent is running. If it's not running, it will start it up.
+   - Run `ssh-add ~/.ssh/id_rsa` to add the new key.
+   - Check `https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account`
    to see steps to copy pub file to clipboard and then into github in Settings > SSH and GPG Keys. Steps to copy change based on OS.
-   -> `ssh -T git@github.com` validates if the secure connection to github and ssh key was correctly setup.
+   - `ssh -T git@github.com` validates if the secure connection to github and ssh key was correctly setup.
 4. Now, copy the ssh url for the new repo created in github and run `git remote add origin ssh_repo_url` to let git now where our code
    is going to live in.
 
