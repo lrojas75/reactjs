@@ -1752,3 +1752,16 @@ app.listen(port, () => {
 ```
 
 7. Teach Heroku how to run webpack by adding the following script to `package.json`: `“heroku-postbuild”: “npm run build:prod”`.
+8. Add the following files to the gitignore file:
+
+```
+#ignore node_modules from projects
+**/node_modules
+**/package-lock.json
+**/bundle.js
+**/bundle.js.map
+**/styles.css
+**/styles.css.map
+```
+
+9. Push changes to heroku: `git push heroku master`.
