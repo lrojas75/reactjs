@@ -468,12 +468,12 @@ _babel-loader is a webpack plugin that allow us to teach webpack how to run babe
 
 ```
 project-name
-|\_public
-|_\_\index.html
-|_\_\bundle.js
-|\_src
-|_\_\components (this now includes all React components that will be created.)
-|_\_\app.js
+|_ public
+|___ index.html
+|___ bundle.js
+|_ src
+|___ components (this now includes all React components that will be created.)
+|___ app.js
 ```
 
 ### Source Maps
