@@ -1471,3 +1471,97 @@ const EditExpensePage = () => {
 
 export default EditExpensePage;
 ```
+
+## Testing Section
+
+### Setting up Jest
+
+Jest website is `https://jestjs.io/`
+To install Jest, we use the command: `npm install --save-dev jest`
+
+**Basic configuration steps:**
+
+1. Add to `package.json` the following script: `"test": "jest"`. This will allow us to run Jest for the first time and
+   it should display an output that says that no tests were found (Which is expected).
+2. Update folder structure inside `src` to now have a folder named `tests`.
+3. Create you first test file with the following naming convention: `testName.test.js`. Notice the `.test` part, this is
+   important because Jest searches for that part when scanning your project for test files to run.
+4. Add a test by using the `test()` function.
+5. configure Jest with Babel to transform `jsx` files to Javascript so it can read them by creating a `babel.config.js` file
+   with the following configuration:
+
+```JavaScript
+module.exports = {
+  presets: ['@babel/preset-env', '@babel/preset-react'],
+  plugins: ['@babel/plugin-proposal-class-properties'],
+};
+```
+
+It can also be a `.babelrc` file which will have the following content instead:
+
+```JavaScript
+{
+    "presets": [
+        "@babel/preset-env",
+        "@babel/preset-react"
+    ],
+    "plugins": ["@babel/plugin-proposal-class-properties"]
+}
+```
+
+```JavaScript
+// Takes in a string which is the description of the test and a function which has the logic of the test.
+test('Should add two numbers', () => { });
+```
+
+Basic Example:
+
+```JavaScript
+const add = (a, b) => a + b;
+
+test('Should add two numbers', () => {
+  const result = add(3, 4);
+  expect(result).toBe(7);
+});
+```
+
+**Jest gives us access to certain functions and keywords globally.**
+Some of these are: `test(testDescription: string, function)`, `expect(valueToValidate)` (more info here: https://jestjs.io/docs/expect),
+
+**The --watchAll allows us to see live updates in the console when working on our tests**
+It can be added to the package.json script like `"test": "jest --watchAll"` or
+it can be ran directly in the console like `npm run test -- --watchAll`.
+_The `--` tells the console that the args that come next belong to the script and not to npm_
+
+### Testing components using react-test-renderer
+
+Unlinke functions, to test a components behaviour we would need to render it and validate that everything is working correcty.
+Since we are not doing this on the browser but instead on code, we would need to use the `react-test-renderer` package to get
+this done.
+To install it we run: `npm install react-test-renderer`.
+
+**Depending on what you are testing, then the import would change like this:**
+`import ReactShallowRenderer from 'react-test-renderer/shallow';`: To test what is being rendered and not user inputs or lifecycle functions.
+ShallowRenderer will only render the given component.
+
+FullDomRendering renders child components
+
+**To test snapshot views, we can use the following code from react-test-renderer package combined with Jest**:
+`renderer.getRenderOutput()` gives us the rendered output of the component.
+`.toMatchSnapshot()` Creates a snapshot of the rendered component the first time the test is run. After this,
+everytime the test runs, the rendered output will be compared to the existing snapshot. This will also create a folder of
+snapshots in the test folder.
+
+Example:
+
+```JavaScript
+test('Should render Header correctly: ', () => {
+  const renderer = new ReactShallowRenderer();
+  renderer.render(<Header />);
+  expect(renderer.getRenderOutput()).toMatchSnapshot();
+});
+```
+
+**For more details on this, the course required to use Enzyme but this library appears to not work with React 17 or 18 yet and probably is dead as mentioned by it's creator (August 7 2022) https://dev.to/wojtekmaj/enzyme-is-dead-now-what-ekl**
+
+## App Deployment
