@@ -466,6 +466,7 @@ _babel-loader is a webpack plugin that allow us to teach webpack how to run babe
 
 ### New folder structure after adding webpack to project
 
+```
 project-name
 |\_public
 |_\_\index.html
@@ -473,6 +474,7 @@ project-name
 |\_src
 |_\_\components (this now includes all React components that will be created.)
 |_\_\app.js
+```
 
 ### Source Maps
 
@@ -1565,3 +1567,29 @@ test('Should render Header correctly: ', () => {
 **For more details on this, the course required to use Enzyme but this library appears to not work with React 17 or 18 yet and probably is dead as mentioned by it's creator (August 7 2022) https://dev.to/wojtekmaj/enzyme-is-dead-now-what-ekl**
 
 ## App Deployment
+
+1. Setup GIT in the project.
+2. Setup Github repo: Create github account and then create a new repository.
+3. Setup ssh keys:
+   To check for existing ssh for a project `ls -a ~/.ssh`. If none exist, then:
+   -> Run `ssh-keygen -t rsa -b 4096 -C "email address here"` to create an ssh key if none exists.
+   -> Run `eval "$(ssh-agent -s)"` to make sure the ssh agent is running. If it's not running, it will start it up.
+   -> Run `ssh-add ~/.ssh/id_rsa` to add the new key.
+   -> Check `https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account`
+   to see steps to copy pub file to clipboard and then into github in Settings > SSH and GPG Keys. Steps to copy change based on OS.
+   -> `ssh -T git@github.com` validates if the secure connection to github and ssh key was correctly setup.
+4. Now, copy the ssh url for the new repo created in github and run `git remote add origin ssh_repo_url` to let git now where our code
+   is going to live in.
+
+### Git commands
+
+**Git changed the name of the base branch from master to main**
+
+`git init`: Create a new git repo.
+`git status`: View the changes to your project code.
+`git add`: Add files to staging area
+`git commit`: Creates a new commit with files from staging area.
+`git log`: View recent commits.
+`git remote`
+`git remote -v`
+`git push -u origin branch`: For the first time push. After that, the `-u` is not needed anymore.
