@@ -1,7 +1,4 @@
 #ignore node_modules from projects
 **/node_modules
 **/package-lock.json
-**/bundle.js
-**/bundle.js.map
-**/styles.css
-**/styles.css.map
+**/public/dist/

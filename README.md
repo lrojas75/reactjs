@@ -1764,4 +1764,22 @@ app.listen(port, () => {
 **/styles.css.map
 ```
 
-9. Push changes to heroku: `git push heroku master`.
+9. Push changes to heroku: `git push heroku master(or main)`.
+10. After the command finished correctly, a url is displayed for you to open or the following command can be run too: `heroku open`.
+
+- For additional debugging, we can run `heroku log` to see server logs and look for errors.
+
+### Cleanup for push up to Heroku
+
+- Move dependencies to `devDependencies` in `package.json` that are only needed for local coding and not needed in production server.
+- Change `.bundle.js` and `styles.css` location in the `index.html` file by updating their location with `/dist/`:
+  `<link rel="stylesheet" type="text/css" href="/dist/styles.css" />`
+  `<script src="/dist/bundle.js"></script>`
+- Update `output` property in `module.exports` in webpack config file to serve files in `dist` folder:
+  ```JavaScript
+  output: {
+    path: path.join(__dirname, 'public', 'dist'),
+    filename: 'bundle.js',
+    publicPath: "/dist/",
+  },
+  ```

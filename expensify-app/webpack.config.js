@@ -1,15 +1,16 @@
-const path = require('path');
+const path = require("path");
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = (_env, argv) => {
-  const isProduction = argv.mode === 'production';
+  const isProduction = argv.mode === "production";
 
   return {
-    entry: './src/app.js',
+    entry: "./src/app.js",
     output: {
-      path: path.join(__dirname, 'public'),
-      filename: 'bundle.js',
+      path: path.join(__dirname, "public", "dist"),
+      filename: "bundle.js",
+      publicPath: "/dist/",
     },
     module: {
       rules: [
@@ -17,9 +18,9 @@ module.exports = (_env, argv) => {
           test: /\.js$/, //files that end in .js
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
-              presets: ['@babel/preset-react', '@babel/preset-env'],
+              presets: ["@babel/preset-react", "@babel/preset-env"],
             },
           },
         },
@@ -28,13 +29,13 @@ module.exports = (_env, argv) => {
           use: [
             MiniCssExtractPlugin.loader,
             {
-              loader: 'css-loader',
+              loader: "css-loader",
               options: {
                 sourceMap: true,
               },
             },
             {
-              loader: 'sass-loader',
+              loader: "sass-loader",
               options: {
                 sourceMap: true,
               },
@@ -45,12 +46,12 @@ module.exports = (_env, argv) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        filename: 'styles.css',
+        filename: "styles.css",
       }),
     ],
-    devtool: isProduction ? 'source-map' : 'inline-cheap-module-source-map',
+    devtool: isProduction ? "source-map" : "inline-cheap-module-source-map",
     devServer: {
-      static: path.join(__dirname, 'public'),
+      static: path.join(__dirname, "public"),
       historyApiFallback: true,
     },
   };
